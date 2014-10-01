@@ -1,10 +1,10 @@
-__author__ = 'MRajendran'
+#!/usr/bin/env python
 
-from Controller import *
+import Controller as Controller
 
 if __name__ == "__main__":
     choice = ""
-    c = Controller()
+    c = Controller.Controller()
 
     while (True):
         print "Main Menu"
