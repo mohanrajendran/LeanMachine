@@ -2,23 +2,22 @@ __author__ = 'MRajendran'
 
 from Station import *
 
-choice = -1
-stations = []
-while (choice != 3):
-    print "Main Menu"
-    print "1) Add Station"
-    print "2) Run"
-    print "3) Quit"
+class Controller():
+    def __init__(self):
+        self.stations = []
 
-    choice = int(raw_input())
+    def addStation(self):
+        try:
+            self.stations.append(Station())
+        except ValueError:
+            print "Capacity should be a number. Please try again"
+            self.addStation()
 
-    if choice == 1:
-        name = raw_input("Name?: ")
-        capacity = raw_input("Capacity?: ")
-        stations.append(Station(name, capacity))
+    def printStations(self):
+        for station in self.stations:
+            print station
 
-    if choice == 2:
-        print "List of stations:-"
-        for station in stations:
-            print "Name:", station.name, " Capacity: ", station.capacity
-        print
+    def run(self):
+        if len(self.stations) == 0:
+            print "You have not added any stations. Please add stations and try again"
+            return
