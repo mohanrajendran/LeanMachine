@@ -7,4 +7,4 @@ class Station():
         self.backlog = []
 
     def __repr__(self):
-        return "Name: " + self.name + "Capacity: " + str(self.capacity)
+        return "Name: " + self.name + " Capacity: " + str(self.capacity)
