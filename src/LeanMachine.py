@@ -11,8 +11,9 @@ if __name__ == "__main__":
         print "1) Add Station"
         print "2) Print Stations"
         print "3) Edit Station"
-        print "4) Run Simulation"
-        print "5) Quit"
+        print "4) Compute throughput"
+        print "5) Compute cycle times"
+        print "6) Quit"
 
         choice = raw_input()
 
@@ -26,9 +27,12 @@ if __name__ == "__main__":
             c.editStation()
 
         elif choice == "4":
-            c.run()
+            c.computeThroughput()
 
         elif choice == "5":
+            c.computeCycleTimes()
+
+        elif choice == "6":
             exit()
 
         else:

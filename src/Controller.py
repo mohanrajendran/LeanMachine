@@ -2,6 +2,8 @@ __author__ = 'MRajendran'
 
 import Station
 import sys
+import Task
+import Queue
 
 class Controller():
     def __init__(self):
@@ -38,7 +40,7 @@ class Controller():
 
         self.stations[choice - 1] = Station.Station()
 
-    def run(self):
+    def computeThroughput(self):
         if len(self.stations) == 0:
             print "You have not added any stations. Please add stations and try again"
             return
@@ -52,9 +54,69 @@ class Controller():
         self.printBacklog()
 
     def printBacklog(self):
+
+        throughput = sys.maxint
+        bottleneck = ""
+
         for idx, station in enumerate(self.stations):
             if(idx != 0):
                 sys.stdout.write("-" + str(station.backlog) + "-")
             sys.stdout.write("[" + station.name + ":" + str(station.capacity) + "]")
+            if station.capacity < throughput:
+                throughput = station.capacity
+                bottleneck = station.name
         print
-        print "Throughput: ", min(s.capacity for s in self.stations)
+
+        print "Throughput: ", throughput
+        print "Bottleneck: ", bottleneck
+
+    def computeCycleTimes(self):
+        if len(self.stations) == 0:
+            print "You have not added any stations. Please add stations and try again"
+            return
+
+        try:
+            pulses = int(raw_input("Enter the number of pulses to simulate: "))
+        except ValueError:
+            print("Please enter an integer")
+            return
+
+        try:
+            workPerPulse = int(raw_input("Enter the number of tasks to push per pulse: "))
+        except ValueError:
+            print("Please enter an integer")
+            return
+
+        self.completed = []
+        averages = []
+        sizes =[]
+
+        for station in self.stations:
+            station.queueLength = 0
+            station.tasks = Queue.Queue()
+
+        for pulse in range(pulses):
+            self.pulseAndWork(pulse, workPerPulse)
+            s = 0
+            for task in self.completed:
+                s += (task.events[-1][0] - task.events[0][0] + 1)
+            averages.append(float(s) / len(self.completed))
+            sizes.append(len(self.completed))
+
+        print "Average cycle time at pulses"
+        for idx, average in enumerate(averages):
+            print "End of cycle", idx, ":"
+            print "   Number of tasks completed:", sizes[idx]
+            print "          Average time taken:", average
+
+        #for idx, task in enumerate(self.completed):
+        #    print idx+1, task.events[-1][0] - task.events[0][0] + 1
+
+    def pulseAndWork(self, pulse, work):
+        completedTasks = [Task.Task() for i in range(self.stations[0].capacity)]
+
+        for station in self.stations:
+            station.addTasks(pulse, completedTasks)
+            completedTasks = station.completeTasks(pulse)
+
+        map(self.completed.append, [t for t in completedTasks])
