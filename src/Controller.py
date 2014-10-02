@@ -1,6 +1,7 @@
 __author__ = 'MRajendran'
 
-from Station import *
+import Station
+import sys
 
 class Controller():
     def __init__(self):
@@ -8,9 +9,9 @@ class Controller():
 
     def addStation(self):
         try:
-            self.stations.append(Station())
+            self.stations.append(Station.Station())
         except ValueError:
-            print "Capacity should be a number. Please try again"
+            print "Capacity should be an integer. Please try again"
 
     def printStations(self):
         for station in self.stations:
@@ -35,9 +36,25 @@ class Controller():
             print "Please enter a valid integer"
             return
 
-        self.stations[choice - 1] = Station()
+        self.stations[choice - 1] = Station.Station()
 
     def run(self):
         if len(self.stations) == 0:
             print "You have not added any stations. Please add stations and try again"
             return
+
+        jobsAvailable = self.stations[0].capacity
+
+        for station in self.stations:
+            station.backlog = max(0, jobsAvailable - station.capacity)
+            jobsAvailable -= station.backlog
+
+        self.printBacklog()
+
+    def printBacklog(self):
+        for idx, station in enumerate(self.stations):
+            if(idx != 0):
+                sys.stdout.write("-" + str(station.backlog) + "-")
+            sys.stdout.write("[" + station.name + ":" + str(station.capacity) + "]")
+        print
+        print "Throughput: ", min(s.capacity for s in self.stations)

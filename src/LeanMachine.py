@@ -11,7 +11,7 @@ if __name__ == "__main__":
         print "1) Add Station"
         print "2) Print Stations"
         print "3) Edit Station"
-        print "4) Run"
+        print "4) Run Simulation"
         print "5) Quit"
 
         choice = raw_input()
