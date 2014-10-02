@@ -41,34 +41,34 @@ class Controller():
         self.stations[choice - 1] = Station.Station()
 
     def computeThroughput(self):
-        if len(self.stations) == 0:
-            print "You have not added any stations. Please add stations and try again"
-            return
+        self.pulseIt(1, self.stations[0].capacity)
 
-        jobsAvailable = self.stations[0].capacity
-
-        for station in self.stations:
-            station.backlog = max(0, jobsAvailable - station.capacity)
-            jobsAvailable -= station.backlog
-
-        self.printBacklog()
+        self.printThroughput()
 
     def printBacklog(self):
 
+        for idx, station in enumerate(self.stations):
+            backlog = station.queueLength
+            if(idx != 0):
+                sys.stdout.write("-" + str(backlog) + "-")
+            sys.stdout.write("[" + station.name + ":" + str(station.capacity) + "]")
+        print
+
+    def printThroughput(self):
         throughput = sys.maxint
         bottleneck = ""
 
         for idx, station in enumerate(self.stations):
-            if(idx != 0):
-                sys.stdout.write("-" + str(station.backlog) + "-")
-            sys.stdout.write("[" + station.name + ":" + str(station.capacity) + "]")
             if station.capacity < throughput:
                 throughput = station.capacity
-                bottleneck = station.name
-        print
+                if idx != 0:
+                    bottleneck = station.name
 
         print "Throughput: ", throughput
-        print "Bottleneck: ", bottleneck
+        if bottleneck == "":
+            print "No bottleneck"
+        else:
+            print "Bottleneck: ", bottleneck
 
     def computeCycleTimes(self):
         if len(self.stations) == 0:
@@ -82,32 +82,35 @@ class Controller():
             return
 
         try:
-            workPerPulse = int(raw_input("Enter the number of tasks to push per pulse: "))
+            workPerPulse = min(self.stations[0].capacity,
+                               int(raw_input("Enter the number of tasks to push per pulse: ")))
         except ValueError:
             print("Please enter an integer")
             return
 
+        self.pulseIt(pulses, workPerPulse)
+
+    def pulseIt(self, pulses, workPerPulse):
         self.completed = []
-        averages = []
-        sizes =[]
 
         for station in self.stations:
             station.queueLength = 0
             station.tasks = Queue.Queue()
+
+        print "Average cycle time at pulses"
 
         for pulse in range(pulses):
             self.pulseAndWork(pulse, workPerPulse)
             s = 0
             for task in self.completed:
                 s += (task.events[-1][0] - task.events[0][0] + 1)
-            averages.append(float(s) / len(self.completed))
-            sizes.append(len(self.completed))
+            average = (float(s) / len(self.completed))
+            size = (len(self.completed))
 
-        print "Average cycle time at pulses"
-        for idx, average in enumerate(averages):
-            print "End of cycle", idx, ":"
-            print "   Number of tasks completed:", sizes[idx]
+            print "End of cycle", pulse, ":"
+            print "   Number of tasks completed:", size
             print "          Average time taken:", average
+            self.printBacklog()
 
         #for idx, task in enumerate(self.completed):
         #    print idx+1, task.events[-1][0] - task.events[0][0] + 1
